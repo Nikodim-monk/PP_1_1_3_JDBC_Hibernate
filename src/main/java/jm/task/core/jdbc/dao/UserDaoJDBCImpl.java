@@ -27,11 +27,14 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
-    public void saveUser(String name, String lastName, byte age) {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("INSERT users(FirstName, LastName, Age) VALUES ('"
-                    + name + "','" + lastName + "'," + age + ")");
-            System.out.println("User с именем Ц " + name + " добавлен в базу данных");
+    public void saveUser(String Name, String lastName, byte age) {
+        try (PreparedStatement pS = connection.prepareStatement("INSERT INTO users (FirstName, lastName, age)" +
+                " VALUES(?, ?, ?);")){
+            pS.setString(1, Name);
+            pS.setString(2, lastName);
+            pS.setByte(3, age);
+            pS.executeUpdate();
+            System.out.println("User с именем Ц " + Name + " добавлен в базу данных");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -59,7 +62,7 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users")) {
             ResultSet rS = preparedStatement.executeQuery();
             while (rS.next()) {
-                users.add(new User(rS.getLong(1),rS.getString(2), rS.getString(3),
+                users.add(new User(rS.getLong(1), rS.getString(2), rS.getString(3),
                         (byte) rS.getInt(4)));
             }
             System.out.println(users);
@@ -69,7 +72,7 @@ public class UserDaoJDBCImpl implements UserDao {
         return users;
     }
 
-    public void closeConn(){
+    public void closeConn() {
         try {
             connection.close();
         } catch (SQLException e) {
